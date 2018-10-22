@@ -13,6 +13,7 @@ import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -24,6 +25,24 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler handler;
     private TextView tvMain;
+
+    private Callback mPostFormCallback = new Callback() {
+        @Override
+        public void onFailure(Call call, IOException e) {
+
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+            final String result = response.body().string();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    tvMain.setText(result);
+                }
+            });
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         loadDataSync();
 //        loadDataAsync();
 //        postForm();
+//        postJson();
     }
 
     private void loadDataSync() {
@@ -95,28 +115,17 @@ public class MainActivity extends AppCompatActivity {
         Request request = new Request.Builder().url("https://en.wikipedia.org/w/index.php").post(formBody).build();
         client.newCall(request).enqueue(mPostFormCallback);
     }
-    private Callback mPostFormCallback = new Callback() {
-        @Override
-        public void onFailure(Call call, IOException e) {
 
-        }
+    private void postJson() {
+        String json = "";
+        String url = "";
+        OkHttpClient okHttpClient = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
 
-        @Override
-        public void onResponse(Call call, Response response) throws IOException {
-            final String result = response.body().string();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Message message = new Message();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("string", result);
-                    message.setData(bundle);
-                    handler.sendMessage(message);
-                    Log.d(TAG, "onResponse: " + result);
-                }
-            });
-        }
-    };
+        RequestBody requestBody = RequestBody.create(mediaType, json);
+        Request request = new Request.Builder().url(url).post(requestBody).build();
+        okHttpClient.newCall(request).enqueue(mPostFormCallback);
+    }
 
-    // TODO: 18-10-22  postJson(){}
+
 }
