@@ -8,8 +8,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.nomad.interceptor.LoggingInterceptor;
+
+import java.io.File;
 import java.io.IOException;
 
+import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -44,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    int cacheSize = 10 * 1024 * 1024;
+    File cacheDirectory = new File("E:\\android\\OkHttp\\cache");
+    Cache cache = new Cache(cacheDirectory, cacheSize);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +77,11 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 String url = "https://publicobject.com/helloworld.txt";
                 Request request = new Request.Builder().get().url(url).build();
-                OkHttpClient okHttpClient = new OkHttpClient();
+                int cacheSize = 10 * 1024 * 1024;
+                File cacheDirectory = new File("E:\\android\\OkHttp\\cache");
+                Cache cache = new Cache(cacheDirectory, cacheSize);
+                OkHttpClient okHttpClient = new OkHttpClient.Builder().cache(cache).build();
+
                 try {
                     Response response = okHttpClient.newCall(request).execute();
                     String string = response.body().string();
@@ -89,7 +101,8 @@ public class MainActivity extends AppCompatActivity {
     private void loadDataAsync() {
         String url = "https://publicobject.com/helloworld.txt";
         Request request = new Request.Builder().get().url(url).build();
-        OkHttpClient okHttpClient = new OkHttpClient();
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().addNetworkInterceptor(new LoggingInterceptor()).build();
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -110,22 +123,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void postForm() {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().addInterceptor(new LoggingInterceptor()).build();
+
         RequestBody formBody = new FormBody.Builder().add("search", "Uncle").build();
         Request request = new Request.Builder().url("https://en.wikipedia.org/w/index.php").post(formBody).build();
-        client.newCall(request).enqueue(mPostFormCallback);
+        okHttpClient.newCall(request).enqueue(mPostFormCallback);
     }
 
     private void postJson() {
         String json = "";
         String url = "";
-        OkHttpClient okHttpClient = new OkHttpClient();
+        int cacheSize = 10 * 1024 * 1024;
+        File cacheDirectory = new File("E:\\android\\OkHttp\\cache");
+        Cache cache = new Cache(cacheDirectory, cacheSize);
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().cache(cache).build();
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
 
         RequestBody requestBody = RequestBody.create(mediaType, json);
         Request request = new Request.Builder().url(url).post(requestBody).build();
         okHttpClient.newCall(request).enqueue(mPostFormCallback);
     }
+
 
 
 }
