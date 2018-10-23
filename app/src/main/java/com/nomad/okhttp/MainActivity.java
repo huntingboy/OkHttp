@@ -1,6 +1,5 @@
 package com.nomad.okhttp;
 
-import android.nfc.Tag;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -42,15 +41,12 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Log.d(TAG, result);
                     tvMain.setText(result);
                 }
             });
         }
     };
-
-    int cacheSize = 10 * 1024 * 1024;
-    File cacheDirectory = new File("E:\\android\\OkHttp\\cache");
-    Cache cache = new Cache(cacheDirectory, cacheSize);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +61,10 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        loadDataSync();
+//        loadDataSync();
 //        loadDataAsync();
 //        postForm();
-//        postJson();
+        postJson();
     }
 
     private void loadDataSync() {
@@ -111,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String result = response.body().toString();
+                String result = response.body().string();
                 Message message = new Message();
                 Bundle bundle = new Bundle();
                 bundle.putString("string", result);
@@ -132,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void postJson() {
         String json = "";
-        String url = "";
+        String url = "http://blog.51cto.com/memory/1086386";
         int cacheSize = 10 * 1024 * 1024;
         File cacheDirectory = new File("E:\\android\\OkHttp\\cache");
         Cache cache = new Cache(cacheDirectory, cacheSize);
